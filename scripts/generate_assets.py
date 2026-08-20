@@ -7,9 +7,9 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 ROOT: Final = Path(__file__).resolve().parents[1]
-SOURCES: Final = ROOT / "source-images"
+SOURCES: Final = ROOT / "source-images" / "originals"
 OUTPUT: Final = ROOT / "assets" / "questions"
-PREVIEWS: Final = ROOT / "assets" / "previews"
+PREVIEWS: Final = ROOT / "source-images" / "previews" / "option-art"
 SCENE_SIZE: Final = (1200, 720)
 ART_SIZE: Final = (1000, 400)
 
@@ -129,7 +129,6 @@ def main() -> None:
         folder = OUTPUT / question["id"]
         folder.mkdir(parents=True, exist_ok=True)
         scene = contain(source.crop(question["scene"]), SCENE_SIZE, (2, 10, 31))
-        save(scene, folder / "scene")
         arts: dict[str, Image.Image] = {}
         for letter, box in question["art"].items():
             arts[letter] = cover(source.crop(box), ART_SIZE)

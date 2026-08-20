@@ -4,20 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#020b24">
-  <title>孩子的學習星球｜純插圖版</title>
-  <link rel="stylesheet" href="css/style.css?v=1">
+  <title>學習星際探索</title>
+  <link rel="stylesheet" href="css/style.css?v=12">
 </head>
 <body>
-  <main class="app" aria-label="孩子的學習星球測驗">
+  <main class="app" aria-label="學習星際探索測驗">
     <section class="quiz" id="quiz" aria-labelledby="pageTitle">
       <h1 class="sr-only" id="pageTitle"></h1>
       <div class="quiz-content">
-        <section class="scene" aria-label="關卡情境">
-          <picture>
-            <source id="sceneWebp" type="image/webp">
-            <img id="sceneImage" width="1200" height="720" alt="" fetchpriority="high">
+        <section class="scene" id="scene" aria-label="關卡情境">
+          <div class="scene-midground" id="sceneMidground" aria-hidden="true"></div>
+          <picture class="scene-foreground" id="sceneForeground" aria-hidden="true">
+            <source type="image/webp">
+            <img width="1400" height="1120" alt="" fetchpriority="high">
           </picture>
-          <button class="back-button" id="backButton" type="button" aria-label="上一題"><span aria-hidden="true">‹</span></button>
+          <div class="scene-copy">
+            <p class="scene-level" id="sceneLevel"></p>
+            <h2 class="scene-title" id="sceneTitle"></h2>
+            <p class="scene-description" id="sceneDescription"></p>
+          </div>
+          <button class="back-button" id="backButton" type="button" aria-label="上一題">
+            <picture aria-hidden="true">
+              <source srcset="assets/ui/back-button.webp" type="image/webp">
+              <img src="assets/ui/back-button.png" width="256" height="256" alt="">
+            </picture>
+          </button>
         </section>
 
         <section class="question-area" aria-label="問題與選項">
@@ -77,6 +88,6 @@
     </section>
   </main>
   <noscript>此頁面需要啟用 JavaScript 才能切換題目與記錄選項。</noscript>
-  <script src="js/app.js" defer></script>
+  <script src="js/app.js?v=6" defer></script>
 </body>
 </html>
