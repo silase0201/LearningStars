@@ -8,6 +8,7 @@ from PIL import Image, ImageDraw
 
 ROOT: Final = Path(__file__).resolve().parents[1]
 ASSETS: Final = ROOT / "assets" / "scenes"
+EXTRACTED_COMPONENTS: Final = ROOT / "source-images" / "redraw-workbench" / "extracted-components"
 STAR: Final = ROOT / "assets" / "backgrounds" / "stars-static.png"
 OUTPUT: Final = ROOT / "source-images" / "redraw-workbench" / "previews" / "scenes"
 
@@ -40,12 +41,17 @@ def background(size: tuple[int, int]) -> Image.Image:
     return canvas
 
 
+def component_path(question_id: str, name: str) -> Path:
+    active = ASSETS / question_id / "components" / f"{name}.png"
+    return active if active.exists() else EXTRACTED_COMPONENTS / question_id / f"{name}.png"
+
+
 def compose(question_id: str, size: tuple[int, int]) -> Image.Image:
     canvas = background(size)
     for name, x, y, width, z in sorted(SCENES[question_id], key=lambda item: item[4]):
         if size[0] == size[1]:
             x, y, width = MOBILE[question_id][name]
-        with Image.open(ASSETS / question_id / "components" / f"{name}.png") as loaded:
+        with Image.open(component_path(question_id, name)) as loaded:
             sprite = loaded.convert("RGBA")
         target_width = round(size[0] * width / 100)
         scale = target_width / sprite.width

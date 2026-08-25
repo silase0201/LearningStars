@@ -5,12 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#020b24">
   <title>學習星際探索</title>
-  <link rel="stylesheet" href="css/style.css?v=12">
+  <link rel="stylesheet" href="css/style.css?v=16">
 </head>
 <body>
   <main class="app" aria-label="學習星際探索測驗">
-    <section class="quiz" id="quiz" aria-labelledby="pageTitle">
-      <h1 class="sr-only" id="pageTitle"></h1>
+    <section class="start-screen" id="startScreen" aria-labelledby="startTitle">
+      <div class="start-shell">
+        <div class="start-message">
+          <p class="start-eyebrow"><span aria-hidden="true">✦</span> 歡迎來到 <span aria-hidden="true">✦</span></p>
+          <h1 class="start-title" id="startTitle">
+            <span class="start-title-lead">孩子的</span>
+            <span class="start-title-color"><span>學習</span><span>星球</span></span>
+          </h1>
+          <p class="start-intro">每個孩子，都有一顆屬於自己的<strong>學習星球</strong>。</p>
+          <ul class="start-traits">
+            <li><span aria-hidden="true">⚑</span><span>有的孩子喜歡<strong class="trait-challenge">挑戰</strong>，</span></li>
+            <li><span aria-hidden="true">⌕</span><span>有的孩子喜歡<strong class="trait-explore">探索</strong>，</span></li>
+            <li><span aria-hidden="true">⟳</span><span>有的孩子喜歡一次次<strong class="trait-try">嘗試</strong>。</span></li>
+          </ul>
+          <p class="start-question">現在，就讓我們一起看看，<strong>你的孩子比較靠近哪一顆星？</strong></p>
+        </div>
+
+        <div class="start-visual" aria-hidden="true">
+          <picture class="start-float start-ring"><source srcset="assets/start/midground/planet-ring.webp" type="image/webp"><img src="assets/start/midground/planet-ring.png" alt=""></picture>
+          <picture class="start-float start-star"><source srcset="assets/start/midground/mascot-star.webp" type="image/webp"><img src="assets/start/midground/mascot-star.png" alt=""></picture>
+          <picture class="start-float start-galaxy"><source srcset="assets/start/midground/galaxy.webp" type="image/webp"><img src="assets/start/midground/galaxy.png" alt=""></picture>
+          <picture class="start-float start-planet start-planet-explore"><source srcset="assets/start/midground/planet-explore.webp" type="image/webp"><img src="assets/start/midground/planet-explore.png" alt=""></picture>
+          <picture class="start-float start-planet start-planet-challenge"><source srcset="assets/start/midground/planet-challenge.webp" type="image/webp"><img src="assets/start/midground/planet-challenge.png" alt=""></picture>
+          <picture class="start-float start-planet start-planet-try"><source srcset="assets/start/midground/planet-try.webp" type="image/webp"><img src="assets/start/midground/planet-try.png" alt=""></picture>
+          <picture class="start-float start-planet start-planet-create"><source srcset="assets/start/midground/planet-create.webp" type="image/webp"><img src="assets/start/midground/planet-create.png" alt=""></picture>
+          <picture class="start-character start-child"><source srcset="assets/start/foreground/character-child.webp" type="image/webp"><img src="assets/start/foreground/character-child.png" alt=""></picture>
+          <picture class="start-character start-robot"><source srcset="assets/start/foreground/character-robot.webp" type="image/webp"><img src="assets/start/foreground/character-robot.png" alt=""></picture>
+          <picture class="start-terrain"><source srcset="assets/start/foreground/terrain.webp" type="image/webp"><img src="assets/start/foreground/terrain.png" alt=""></picture>
+        </div>
+
+        <div class="start-actions">
+          <button class="start-button" id="startButton" type="button">
+            <picture aria-hidden="true"><source srcset="assets/start/ui/rocket.webp" type="image/webp"><img src="assets/start/ui/rocket.png" alt=""></picture>
+            <span>開始探索</span><span class="start-button-sparkle" aria-hidden="true">✦</span>
+          </button>
+          <ul class="start-meta" aria-label="測驗說明">
+            <li><picture aria-hidden="true"><source srcset="assets/start/ui/clock.webp" type="image/webp"><img src="assets/start/ui/clock.png" alt=""></picture><span>約 90 秒</span></li>
+            <li><picture aria-hidden="true"><source srcset="assets/start/midground/mascot-star.webp" type="image/webp"><img src="assets/start/midground/mascot-star.png" alt=""></picture><span>6 個<br>生活情境</span></li>
+            <li><picture aria-hidden="true"><source srcset="assets/start/ui/heart.webp" type="image/webp"><img src="assets/start/ui/heart.png" alt=""></picture><span>沒有<br>標準答案</span></li>
+          </ul>
+          <p class="start-note"><span aria-hidden="true">▣</span> 沒有對錯，只要選出最像孩子的答案</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="quiz" id="quiz" aria-labelledby="pageTitle" hidden>
+      <h1 class="sr-only" id="pageTitle" tabindex="-1"></h1>
       <div class="quiz-content">
         <section class="scene" id="scene" aria-label="關卡情境">
           <div class="scene-midground" id="sceneMidground" aria-hidden="true"></div>
@@ -77,17 +122,85 @@
       <p class="status" id="status" role="status" aria-live="polite"></p>
     </section>
 
-    <section class="completion" id="completion" hidden aria-labelledby="completionTitle">
-      <div class="completion-card">
-        <span class="completion-star" aria-hidden="true">★</span>
-        <h2 id="completionTitle">探索完成！</h2>
-        <p>你已經找到了孩子的學習星。</p>
-        <div class="answer-summary" id="answerSummary" aria-label="作答結果"></div>
-        <div class="completion-actions"><button id="reviewButton" type="button">回到第一題</button><button id="restartButton" type="button">重新作答</button></div>
+    <section class="post-screen result-screen" id="resultScreen" hidden aria-labelledby="resultHeading">
+      <div class="result-layout">
+        <section class="result-visual">
+          <p class="result-kicker">✦ 探索完成 ✦</p>
+          <h2 id="resultHeading" tabindex="-1">你和孩子一起走過了<br><strong>6 個學習星球！</strong></h2>
+          <picture class="post-drift post-galaxy" aria-hidden="true"><source srcset="assets/start/midground/galaxy.webp" type="image/webp"><img src="assets/start/midground/galaxy.png" alt=""></picture>
+          <picture class="post-drift post-ring" aria-hidden="true"><source srcset="assets/start/midground/planet-ring.webp" type="image/webp"><img src="assets/start/midground/planet-ring.png" alt=""></picture>
+          <picture class="result-foreground" aria-hidden="true"><source srcset="assets/result/foreground.webp" type="image/webp"><img src="assets/result/foreground.png" alt=""></picture>
+          <p class="result-note"><strong>這是孩子的「初步探索結果」</strong><br>孩子真正的學習方式，還有更多面向值得了解！</p>
+        </section>
+        <article class="result-card">
+          <p class="result-discovery">✦ 從剛才的過程中，我們發現孩子可能特別靠近：✦</p>
+          <div class="result-identity">
+            <div class="result-icons" id="resultIcons" aria-hidden="true"></div>
+            <div><h3 id="resultName"></h3><p id="resultSubtitle"></p></div>
+            <p id="resultIntro"></p>
+          </div>
+          <h4>✦ 可能喜歡：</h4>
+          <ul class="result-traits" id="resultTraits"></ul>
+          <div class="result-book">
+            <picture aria-hidden="true"><source srcset="assets/contact/learning-book.webp" type="image/webp"><img src="assets/contact/learning-book.png" alt=""></picture>
+            <p><strong>還有一份專屬學習書</strong><br>依照孩子的學習星，我們準備了一本專屬學習書。</p>
+            <button id="resultContactButton" type="button"><span aria-hidden="true">🎁</span> 解鎖專屬學習書 <span aria-hidden="true">›</span></button>
+          </div>
+          <p class="result-private">🔒 完整報告將由專人親自為您說明</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="post-screen contact-screen" id="contactScreen" hidden aria-labelledby="contactHeading">
+      <button class="back-button" id="contactBackButton" type="button" aria-label="返回結果頁">
+        <picture aria-hidden="true">
+          <source srcset="assets/ui/back-button.webp" type="image/webp">
+          <img src="assets/ui/back-button.png" width="256" height="256" alt="">
+        </picture></button>
+      <div class="contact-layout">
+        <section class="contact-intro">
+          <p class="contact-kicker">🎁 解鎖孩子的</p>
+          <h2>專屬學習書</h2>
+          <p>留下資料後，我們將送您：</p>
+          <ul><li>📖 孩子的專屬學習書</li><li>⭐ 完整探索結果說明</li><li>💡 學習與思考觀察分享</li></ul>
+          <picture class="contact-robot post-drift" aria-hidden="true"><source srcset="assets/contact/robot-reading.webp" type="image/webp"><img src="assets/contact/robot-reading.png" alt=""></picture>
+        </section>
+        <div class="contact-form-column">
+          <form class="contact-card" id="contactForm" novalidate>
+            <h2 id="contactHeading" tabindex="-1">✦ 填寫領取資料 ✦</h2>
+            <div class="contact-grid">
+              <label>家長姓名<input name="parent_name" autocomplete="name" required maxlength="40" placeholder="請輸入家長姓名"><small></small></label>
+              <label>聯絡電話<input name="phone" autocomplete="tel" inputmode="tel" required maxlength="20" placeholder="請輸入聯絡電話"><small></small></label>
+              <div class="contact-field contact-period" role="group" aria-labelledby="contactPeriodLabel"><span class="contact-field-label" id="contactPeriodLabel">方便聯絡時間</span><div class="contact-radio-pair"><label><input type="radio" name="contact_period" value="am" required> 上午</label><label><input type="radio" name="contact_period" value="pm"> 下午</label></div><small></small></div>
+              <label>孩子姓名<input name="child_name" autocomplete="off" required maxlength="40" placeholder="請輸入孩子姓名"><small></small></label>
+              <div class="contact-field age-options" role="group" aria-labelledby="childAgeLabel"><span class="contact-field-label" id="childAgeLabel">孩子年齡</span><div><input id="childAge3" type="radio" name="child_age" value="3" required><label for="childAge3">3歲</label><input id="childAge4" type="radio" name="child_age" value="4"><label for="childAge4">4歲</label><input id="childAge5" type="radio" name="child_age" value="5"><label for="childAge5">5歲</label><input id="childAge6" type="radio" name="child_age" value="6"><label for="childAge6">6歲</label><input id="childAge7" type="radio" name="child_age" value="7"><label for="childAge7">7歲</label></div><small></small></div>
+              <label class="county-field">縣市<select name="county_city" required><option value="">請選擇縣市</option><option>臺北市</option><option>新北市</option><option>桃園市</option><option>臺中市</option><option>臺南市</option><option>高雄市</option><option>基隆市</option><option>新竹市</option><option>嘉義市</option><option>新竹縣</option><option>苗栗縣</option><option>彰化縣</option><option>南投縣</option><option>雲林縣</option><option>嘉義縣</option><option>屏東縣</option><option>宜蘭縣</option><option>花蓮縣</option><option>臺東縣</option><option>澎湖縣</option><option>金門縣</option><option>連江縣</option></select><small></small></label>
+            </div>
+            <button class="contact-submit" id="contactSubmitButton" type="submit"><span aria-hidden="true">🎁</span> 領取專屬學習書 <span aria-hidden="true">›</span></button>
+            <p class="contact-status" id="contactStatus" role="status" aria-live="polite"></p>
+          </form>
+          <p class="contact-consent">🛡️ 填寫並送出資料，即表示您同意由教育顧問致電聯絡。</p>
+          <picture class="contact-submit-robot" aria-hidden="true"><source srcset="assets/contact/robot-waving.webp" type="image/webp"><img src="assets/contact/robot-waving.png" alt=""></picture>
+        </div>
+      </div>
+    </section>
+
+    <section class="post-screen finish-screen" id="finishScreen" hidden aria-labelledby="finishHeading">
+      <div class="finish-layout">
+        <picture class="finish-foreground" aria-hidden="true"><source srcset="assets/finish/foreground.webp" type="image/webp"><img src="assets/finish/foreground.png" alt=""></picture>
+        <article class="finish-card">
+          <picture aria-hidden="true"><source srcset="assets/contact/gift.webp" type="image/webp"><img src="assets/contact/gift.png" alt=""></picture>
+          <h2 id="finishHeading" tabindex="-1">資料已送出</h2>
+          <div aria-hidden="true">······ ★ ······</div>
+          <p>謝謝您完成填寫！</p>
+        </article>
       </div>
     </section>
   </main>
   <noscript>此頁面需要啟用 JavaScript 才能切換題目與記錄選項。</noscript>
-  <script src="js/app.js?v=6" defer></script>
+  <script src="js/result-data.js?v=1" defer></script>
+  <script src="js/scoring.js?v=2" defer></script>
+  <script src="js/submission.js?v=1" defer></script>
+  <script src="js/app.js?v=10" defer></script>
 </body>
 </html>

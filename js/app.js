@@ -40,8 +40,10 @@ const sceneMidgrounds={
   ]
 };
 const foregroundHeights={q01:573,q02:737,q03:434,q04:775,q05:652,q06:639};
-const state={current:0,answers:Array(questions.length).fill(null)};
-const quiz=document.querySelector("#quiz"),pageTitle=document.querySelector("#pageTitle"),sceneMidground=document.querySelector("#sceneMidground"),sceneForeground=document.querySelector("#sceneForeground"),sceneLevel=document.querySelector("#sceneLevel"),sceneTitle=document.querySelector("#sceneTitle"),sceneDescription=document.querySelector("#sceneDescription"),prompt=document.querySelector("#prompt"),promptIcon=document.querySelector("#promptIcon"),promptLead=document.querySelector("#promptLead"),promptHighlight=document.querySelector("#promptHighlight"),choices=[...document.querySelectorAll(".choice")],progressButtons=[...document.querySelectorAll("#progress button")],progressCount=document.querySelector("#progressCount"),backButton=document.querySelector("#backButton"),nextButton=document.querySelector("#nextButton"),nextText=document.querySelector("#nextText"),status=document.querySelector("#status"),completion=document.querySelector("#completion"),answerSummary=document.querySelector("#answerSummary"),reviewButton=document.querySelector("#reviewButton"),restartButton=document.querySelector("#restartButton");
+const state={current:0,answers:Array(questions.length).fill(null),submissionId:null,scores:null,resultId:null,statisticsStatus:null};
+const startScreen=document.querySelector("#startScreen"),startButton=document.querySelector("#startButton"),quiz=document.querySelector("#quiz"),pageTitle=document.querySelector("#pageTitle"),sceneMidground=document.querySelector("#sceneMidground"),sceneForeground=document.querySelector("#sceneForeground"),sceneLevel=document.querySelector("#sceneLevel"),sceneTitle=document.querySelector("#sceneTitle"),sceneDescription=document.querySelector("#sceneDescription"),prompt=document.querySelector("#prompt"),promptIcon=document.querySelector("#promptIcon"),promptLead=document.querySelector("#promptLead"),promptHighlight=document.querySelector("#promptHighlight"),choices=[...document.querySelectorAll(".choice")],progressButtons=[...document.querySelectorAll("#progress button")],progressCount=document.querySelector("#progressCount"),backButton=document.querySelector("#backButton"),nextButton=document.querySelector("#nextButton"),nextText=document.querySelector("#nextText"),status=document.querySelector("#status");
+const resultScreen=document.querySelector("#resultScreen"),resultHeading=document.querySelector("#resultHeading"),resultName=document.querySelector("#resultName"),resultSubtitle=document.querySelector("#resultSubtitle"),resultIntro=document.querySelector("#resultIntro"),resultTraits=document.querySelector("#resultTraits"),resultIcons=document.querySelector("#resultIcons"),resultContactButton=document.querySelector("#resultContactButton");
+const contactScreen=document.querySelector("#contactScreen"),contactHeading=document.querySelector("#contactHeading"),contactBackButton=document.querySelector("#contactBackButton"),contactForm=document.querySelector("#contactForm"),contactSubmitButton=document.querySelector("#contactSubmitButton"),contactStatus=document.querySelector("#contactStatus"),finishScreen=document.querySelector("#finishScreen"),finishHeading=document.querySelector("#finishHeading");
 let statusTimer;
 const questionAsset=(id,name,ext)=>`assets/questions/${id}/${name}.${ext}`;
 const sceneAsset=(id,name,ext)=>`assets/scenes/${id}/${name}.${ext}`;
@@ -84,12 +86,103 @@ function render({announce=true}={}){
   if(announce)showStatus(`${fullTitle}，${selected?`目前選擇 ${selected}`:"尚未選擇答案"}`);
 }
 
+function startQuiz(){
+  state.current=0;
+  startScreen.hidden=true;
+  quiz.hidden=false;
+  render({announce:false});
+  scrollTo({top:0,behavior:"auto"});
+  requestAnimationFrame(()=>pageTitle.focus({preventScroll:true}));
+}
+
 function showStatus(message){clearTimeout(statusTimer);status.textContent=message;status.classList.add("is-visible");statusTimer=setTimeout(()=>status.classList.remove("is-visible"),1800);}
 function goTo(index,announce=true){if(index<0||index>=questions.length||index===state.current)return;quiz.classList.add("is-changing");setTimeout(()=>{state.current=index;render({announce});requestAnimationFrame(()=>quiz.classList.remove("is-changing"));scrollTo({top:0,behavior:"smooth"});},160);}
 function select(letter,focus=false){state.answers[state.current]=letter;choices.forEach(button=>{const active=button.dataset.option===letter;button.setAttribute("aria-checked",String(active));button.tabIndex=active?0:-1;if(active&&focus)button.focus();});progressButtons[state.current].classList.add("is-answered");nextButton.classList.remove("needs-answer");const option=questions[state.current].options.find(([item])=>item===letter);showStatus(`已選擇 ${letter}：${option[1]}`);}
-function finish(){answerSummary.replaceChildren(...state.answers.map((answer,index)=>{const item=document.createElement("span");item.textContent=answer;item.title=`第 ${index+1} 題：${answer}`;return item;}));completion.hidden=false;reviewButton.focus();}
+function showStage(target,focusTarget){
+  [startScreen,quiz,resultScreen,contactScreen,finishScreen].forEach(screen=>{screen.hidden=screen!==target;});
+  scrollTo({top:0,behavior:"auto"});
+  if(focusTarget)requestAnimationFrame(()=>focusTarget.focus({preventScroll:true}));
+}
+
+function assetPicture(folder,name){
+  const picture=document.createElement("picture"),source=document.createElement("source"),image=document.createElement("img");
+  source.type="image/webp";source.srcset=`assets/${folder}/${name}.webp`;image.src=`assets/${folder}/${name}.png`;image.alt="";
+  picture.append(source,image);return picture;
+}
+
+function renderResult(){
+  const data=LearningStarsResults[state.resultId];
+  const leaders=[["target",state.scores.target],["explore",state.scores.explore],["growth",state.scores.growth]];
+  const maximum=Math.max(...leaders.map(([,score])=>score));
+  resultIcons.replaceChildren(...leaders.filter(([,score])=>score===maximum).map(([name])=>assetPicture("result/icons",name)));
+  resultName.textContent=data.name.replace(/[🎯🔍🌱]\s*/gu,"");resultSubtitle.textContent=data.subtitle;resultIntro.textContent=data.intro;
+  resultName.classList.toggle("is-long",data.type!=="單星");
+  const traitAssets=["flag","trophy","rocket"];
+  resultTraits.replaceChildren(...data.traits.map((trait,index)=>{
+    const item=document.createElement("li"),picture=assetPicture("result/traits",traitAssets[index]),text=document.createElement("strong");
+    text.textContent=trait.replace(/^\S+\s*/u,"");item.append(picture,text);return item;
+  }));
+}
+
+async function completeQuiz(){
+  nextButton.disabled=true;showStatus("正在整理孩子的探索結果…");
+  state.submissionId=state.submissionId||LearningStarsSubmission.createSubmissionId();
+  state.scores=LearningStarsScoring.calculateMainScores(state.answers);
+  state.resultId=LearningStarsScoring.resolveResultId(state.scores);
+  const payload={schema_version:1,submission_id:state.submissionId,assessment:{answers:[...state.answers],scores:state.scores,result_id:state.resultId},submitted_at:new Date().toISOString()};
+  state.statisticsStatus=await LearningStarsSubmission.submitStatistics(payload);
+  renderResult();nextButton.disabled=false;showStage(resultScreen,resultHeading);
+}
+
+function showContact(){
+  contactStatus.textContent="";
+  showStage(contactScreen,contactHeading);
+}
+
+function validateContact(){
+  let valid=true;
+  contactForm.querySelectorAll("small").forEach(item=>item.textContent="");
+  [...contactForm.elements].forEach(field=>field.removeAttribute&&field.removeAttribute("aria-invalid"));
+  const required=[["parent_name","請輸入家長姓名"],["phone","請輸入聯絡電話"],["contact_period","請選擇方便聯絡時間"],["child_name","請輸入孩子姓名"],["child_age","請選擇孩子年齡"],["county_city","請選擇縣市"]];
+  required.forEach(([name,message])=>{
+    const fields=[...contactForm.elements].filter(field=>field.name===name),hasValue=fields.some(field=>field.type==="radio"?field.checked:Boolean(field.value.trim()));
+    if(hasValue)return;
+    valid=false;fields.forEach(field=>field.setAttribute("aria-invalid","true"));
+    const host=fields[0].type==="radio"?fields[0].closest(".contact-field"):fields[0].closest("label");
+    const error=host.querySelector("small");if(error)error.textContent=message;
+  });
+  const phone=contactForm.elements.phone;
+  if(phone.value&&!/^[0-9+()#\-\s]{8,20}$/.test(phone.value)){
+    valid=false;phone.setAttribute("aria-invalid","true");phone.closest("label").querySelector("small").textContent="請輸入有效的聯絡電話";
+  }
+  return valid;
+}
+
+async function submitContact(event){
+  event.preventDefault();
+  if(!validateContact()){contactStatus.textContent="請確認標示的欄位。";contactForm.querySelector("[aria-invalid=true]").focus();return;}
+  contactSubmitButton.disabled=true;contactForm.setAttribute("aria-busy","true");contactStatus.textContent="資料送出中…";
+  const form=new FormData(contactForm),payload={
+    schema_version:1,submission_id:state.submissionId,
+    assessment:{answers:[...state.answers],scores:{...state.scores},result_id:state.resultId},
+    contact:{parent_name:String(form.get("parent_name")).trim(),phone:String(form.get("phone")).trim(),contact_period:form.get("contact_period"),child_name:String(form.get("child_name")).trim(),child_age:form.get("child_age"),county_city:form.get("county_city")},
+    consent:{education_consultant_contact:true,copy_version:1,consented_at:new Date().toISOString()}
+  };
+  const response=await LearningStarsSubmission.submitContact(payload);
+  contactSubmitButton.disabled=false;contactForm.removeAttribute("aria-busy");
+  // Temporary: let the prototype continue while no contact endpoint is configured.
+  if(!response.ok&&response.code!=="not_configured"){
+    contactStatus.textContent="資料未送出，請檢查連線後再試一次。";
+    return;
+  }
+  contactForm.reset();showStage(finishScreen,finishHeading);
+}
 
 choices.forEach((button,index)=>{button.addEventListener("click",()=>select(button.dataset.option));button.addEventListener("keydown",event=>{if(!["ArrowRight","ArrowDown","ArrowLeft","ArrowUp"].includes(event.key))return;event.preventDefault();const direction=event.key==="ArrowRight"||event.key==="ArrowDown"?1:-1,nextIndex=(index+direction+choices.length)%choices.length;select(choices[nextIndex].dataset.option,true);});});
+startButton.addEventListener("click",startQuiz);
 progressButtons.forEach(button=>button.addEventListener("click",()=>goTo(Number(button.dataset.question),false)));backButton.addEventListener("click",()=>state.current===0?showStatus("目前已經是第一題"):goTo(state.current-1));
-nextButton.addEventListener("click",()=>{if(!state.answers[state.current]){nextButton.classList.remove("needs-answer");void nextButton.offsetWidth;nextButton.classList.add("needs-answer");showStatus("請先選擇一個選項");return;}if(state.current<questions.length-1)return goTo(state.current+1);const missing=state.answers.findIndex(answer=>!answer);if(missing!==-1){showStatus(`第 ${missing+1} 題尚未作答，將為你跳回該題`);setTimeout(()=>goTo(missing),650);}else finish();});
-reviewButton.addEventListener("click",()=>{completion.hidden=true;state.current=0;render();});restartButton.addEventListener("click",()=>{state.answers.fill(null);completion.hidden=true;state.current=0;render();});render({announce:false});
+nextButton.addEventListener("click",()=>{if(!state.answers[state.current]){nextButton.classList.remove("needs-answer");void nextButton.offsetWidth;nextButton.classList.add("needs-answer");showStatus("請先選擇一個選項");return;}if(state.current<questions.length-1)return goTo(state.current+1);const missing=state.answers.findIndex(answer=>!answer);if(missing!==-1){showStatus(`第 ${missing+1} 題尚未作答，將為你跳回該題`);setTimeout(()=>goTo(missing),650);}else void completeQuiz();});
+resultContactButton.addEventListener("click",showContact);
+contactBackButton.addEventListener("click",()=>showStage(resultScreen,resultHeading));
+contactForm.addEventListener("submit",submitContact);
+preload(0);

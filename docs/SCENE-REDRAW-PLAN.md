@@ -213,7 +213,7 @@ components: [
 - 新增六題共用的 `scene-space-static.png/webp` 靜態星點星雲背景。
 - 現有 `stars-twinkle.png` 保持原星點數量，疊在共用靜態背景上方。
 - 關卡、標題與描述繼續使用 HTML 文字，返回按鈕保持獨立可操作元件。
-- 舊分元件素材保留於工作區，但正式 HTML、CSS、JavaScript 已停止引用。
+- 舊分元件素材保留於 `source-images/redraw-workbench/extracted-components`；正式 `assets` 只保留 `sceneMidgrounds` 仍載入的中層元件。
 - 新增 `scripts/process_scene_foregrounds.py`，負責 alpha 清理、5:4 畫布與 PNG/WebP 輸出。
 
 ## 十四、q01 標準延伸至 q02–q06（2026-08-20）

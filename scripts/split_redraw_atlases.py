@@ -13,6 +13,7 @@ ROOT: Final = Path(__file__).resolve().parents[1]
 MASTERS: Final = ROOT / "source-images" / "redraw-workbench" / "masters"
 PREVIEWS: Final = ROOT / "source-images" / "redraw-workbench" / "previews"
 OUTPUT: Final = ROOT / "assets" / "scenes"
+ARCHIVE_OUTPUT: Final = ROOT / "source-images" / "redraw-workbench" / "extracted-components"
 
 COMPONENTS: Final = {
     "q01": [
@@ -39,6 +40,15 @@ COMPONENTS: Final = {
         "character-child", "environment-cockpit-map", "story-star-task",
         "story-star-puzzle", "story-star-growth", "story-star-creative",
     ],
+}
+
+ACTIVE_COMPONENTS: Final = {
+    "q01": {"celestial-planet-purple", "celestial-planet-blue-moon"},
+    "q02": {"celestial-planet-blue", "celestial-galaxy-moon"},
+    "q03": {"story-main-asteroid", "celestial-storm-vortex", "celestial-asteroid-group"},
+    "q04": {"story-planet-volcano", "story-planet-discovery", "story-planet-adventure", "story-planet-create"},
+    "q05": {"environment-library"},
+    "q06": {"story-star-task", "story-star-puzzle", "story-star-growth", "story-star-creative"},
 }
 
 ENCLOSED_BACKGROUND_SEEDS: Final = {
@@ -194,7 +204,12 @@ def main() -> None:
             sprite = atlas.crop(box)
             sprite = keep_largest_alpha_components(sprite, KEEP_COMPONENTS.get((question_id, name), 1))
             sprite = trim_with_padding(sprite)
-            save_component(sprite, OUTPUT / question_id / "components" / name)
+            target = (
+                OUTPUT / question_id / "components" / name
+                if name in ACTIVE_COMPONENTS[question_id]
+                else ARCHIVE_OUTPUT / question_id / name
+            )
+            save_component(sprite, target)
             sprites.append((name, sprite))
         make_preview(question_id, sprites)
         print(f"Split {question_id}: {len(sprites)} components")
