@@ -2,23 +2,39 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "score.csv"
+SOURCE = ROOT / "score2.csv"
 OUTPUT = ROOT / "js" / "question-data.js"
 COLORS = {"A": "#bd2026", "B": "#16833e", "C": "#1769ba", "D": "#6339a7"}
 
 
-def split_once(value: str) -> tuple[str, str]:
-    head, separator, tail = value.partition("｜")
-    return head.strip(), tail.strip() if separator else ""
+def normalize(value: str) -> str:
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def split_option(value: str) -> tuple[str, str]:
+    normalized = normalize(value)
+    head, separator, tail = normalized.partition(" ")
+    return head, tail if separator else ""
+
+
+def split_question(value: str) -> tuple[str, str]:
+    normalized = normalize(value)
+    boundary = normalized.rfind("。")
+    if boundary == -1 or boundary == len(normalized) - 1:
+        return "", normalized
+    return normalized[: boundary + 1], normalized[boundary + 1 :].strip()
 
 
 def load_rows() -> list[dict[str, str]]:
     lines = SOURCE.read_text(encoding="utf-8-sig").splitlines()
-    header_index = next(index for index, line in enumerate(lines) if line.startswith("answer_key,"))
+    header_index = next(
+        index for index, line in enumerate(lines) if "answer_key,題號,題目,選項,答案文字" in line
+    )
     return list(csv.DictReader(lines[header_index:]))
 
 
@@ -30,10 +46,11 @@ def build_questions(rows: list[dict[str, str]]) -> list[dict[str, object]]:
         if [row["選項"] for row in group] != list("ABCD"):
             raise ValueError(f"{key} must contain exactly A, B, C, D in order")
 
-        _, scene_title = split_once(group[0]["關卡名稱"])
+        scene_title = normalize(group[0][""])
+        scene_description, question = split_question(group[0]["題目"])
         options = []
         for row in group:
-            title, subtitle = split_once(row["答案文字"])
+            title, subtitle = split_option(row["答案文字"])
             letter = row["選項"]
             options.append(
                 {
@@ -48,8 +65,8 @@ def build_questions(rows: list[dict[str, str]]) -> list[dict[str, object]]:
             {
                 "id": f"q{number:02d}",
                 "sceneTitle": scene_title,
-                "sceneDescription": group[0]["場景"].strip(),
-                "question": group[0]["題目"].strip(),
+                "sceneDescription": scene_description,
+                "question": question,
                 "options": options,
             }
         )
