@@ -304,3 +304,42 @@ body:before{content:"";position:fixed;z-index:0;inset:0;pointer-events:none;back
   .next-button{min-width:6.2em;min-height:42px;gap:4px;padding:.2em .55em;border-width:2px;font-size:1.12rem}
   .status{bottom:max(74px,calc(env(safe-area-inset-bottom) + 64px))}
 }
+
+/* CSV question copy and 400x300 background-image answer cards. */
+.scene-copy{display:grid;justify-items:center;gap:.28rem}
+.scene-title,.scene-description,.scene-question{margin:0}
+.scene-question{width:min(100%,36rem);color:#ffe06a;font-size:clamp(1rem,1.15vw,1.3rem);font-weight:950;line-height:1.35;text-wrap:balance;text-shadow:0 .12rem .2rem #000,0 0 .65rem #09183d}
+.question-area{grid-template-rows:minmax(0,1fr)}
+.choices{align-content:center;grid-template-rows:repeat(2,auto)}
+.choice{position:relative;display:block;aspect-ratio:4/3;overflow:hidden;border-color:color-mix(in srgb,var(--choice-color) 72%,white);background-color:#fffaf1;background-image:linear-gradient(180deg,#fffdf9 0%,#fffdf9f5 24%,#fffdf982 35%,transparent 51%),var(--choice-image);background-position:center;background-repeat:no-repeat;background-size:100% 100%,cover}
+.choice-heading{position:absolute;z-index:2;inset:0 0 auto;min-height:31%;display:flex;align-items:flex-start;gap:.48rem;padding:.42rem 2.4rem .3rem .42rem;background:none}
+.choice-copy{min-width:0;display:grid;align-content:start;gap:.08rem;padding-top:.05rem}
+.choice-title{color:var(--choice-color);font-size:clamp(1rem,1.25vw,1.3rem);font-weight:950;line-height:1.12;text-wrap:balance}
+.choice-description{min-height:0;display:block;padding:0;color:#263348;font-size:1rem;font-weight:850;line-height:1.08;text-align:left;background:none;text-wrap:balance}
+.choice-description:empty{display:none}
+.choice-letter{width:2.45rem;font-size:1.45rem}
+.choice:hover{background-size:100% 100%,cover}
+.choice[aria-checked="true"]:after{right:.42rem;top:.42rem}
+
+/* Every visible text style has a computed minimum of 1rem (16px). */
+small,.score-item dt,.progress-label,.scene-description,.choice-description,.start-meta li,.start-note,.start-eyebrow,.start-intro,.start-traits,.start-question,.result-note,.result-discovery,.result-identity>p,.result-traits strong,.result-book p,.result-private,.contact-intro>p:not(.contact-kicker),.contact-intro ul,.contact-consent,.contact-card label,.contact-card legend,.contact-field-label,.age-options>div{font-size:1rem}
+
+@media(max-width:899px){
+  .quiz-content{grid-template-rows:minmax(0,1fr) auto}
+  .scene{height:auto;min-height:0;aspect-ratio:auto}
+  .scene-copy{top:2%;gap:.18rem}
+  .scene-description{font-size:1rem;line-height:1.25}
+  .scene-question{font-size:1rem;line-height:1.22}
+  .question-area{align-self:end;display:block;padding:6px}
+  .choices{height:auto;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,auto);gap:7px}
+  .choice{height:auto;min-height:0;aspect-ratio:4/3}
+  .choice-heading{min-height:34%;gap:.32rem;padding:.3rem 1.9rem .22rem .3rem}
+  .choice-letter{width:2.05rem;font-size:1.2rem}
+  .choice-title{font-size:1rem;line-height:1.04}
+  .choice-description{font-size:1rem;line-height:1.02}
+}
+
+@media(min-width:900px){
+  .choices{align-content:center}
+  .choice{aspect-ratio:4/3}
+}

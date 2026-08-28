@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#020b24">
   <title>學習星際探索</title>
-  <link rel="stylesheet" href="css/style.css?v=16">
+  <link rel="stylesheet" href="css/style.css?v=17">
 </head>
 <body>
   <main class="app" aria-label="學習星際探索測驗">
@@ -64,9 +64,9 @@
             <img width="1400" height="1120" alt="" fetchpriority="high">
           </picture>
           <div class="scene-copy">
-            <p class="scene-level" id="sceneLevel"></p>
             <h2 class="scene-title" id="sceneTitle"></h2>
             <p class="scene-description" id="sceneDescription"></p>
+            <p class="scene-question" id="sceneQuestion"></p>
           </div>
           <button class="back-button" id="backButton" type="button" aria-label="上一題">
             <picture aria-hidden="true">
@@ -77,31 +77,18 @@
         </section>
 
         <section class="question-area" aria-label="問題與選項">
-          <div class="prompt" id="prompt">
-            <span class="prompt-icon" id="promptIcon" aria-hidden="true"></span>
-            <p><span id="promptLead"></span><strong id="promptHighlight"></strong></p>
-          </div>
-
           <div class="choices" id="choices" role="radiogroup" aria-label="答案選項">
             <button class="choice" type="button" role="radio" aria-checked="false" data-option="A">
-              <span class="choice-heading"><span class="choice-letter">A</span><strong class="choice-title"></strong></span>
-              <picture class="choice-art"><source type="image/webp"><img width="1000" height="400" alt=""></picture>
-              <span class="choice-description"></span>
+              <span class="choice-heading"><span class="choice-letter">A</span><span class="choice-copy"><strong class="choice-title"></strong><span class="choice-description"></span></span></span>
             </button>
             <button class="choice" type="button" role="radio" aria-checked="false" data-option="B">
-              <span class="choice-heading"><span class="choice-letter">B</span><strong class="choice-title"></strong></span>
-              <picture class="choice-art"><source type="image/webp"><img width="1000" height="400" alt=""></picture>
-              <span class="choice-description"></span>
+              <span class="choice-heading"><span class="choice-letter">B</span><span class="choice-copy"><strong class="choice-title"></strong><span class="choice-description"></span></span></span>
             </button>
             <button class="choice" type="button" role="radio" aria-checked="false" data-option="C">
-              <span class="choice-heading"><span class="choice-letter">C</span><strong class="choice-title"></strong></span>
-              <picture class="choice-art"><source type="image/webp"><img width="1000" height="400" alt=""></picture>
-              <span class="choice-description"></span>
+              <span class="choice-heading"><span class="choice-letter">C</span><span class="choice-copy"><strong class="choice-title"></strong><span class="choice-description"></span></span></span>
             </button>
             <button class="choice" type="button" role="radio" aria-checked="false" data-option="D">
-              <span class="choice-heading"><span class="choice-letter">D</span><strong class="choice-title"></strong></span>
-              <picture class="choice-art"><source type="image/webp"><img width="1000" height="400" alt=""></picture>
-              <span class="choice-description"></span>
+              <span class="choice-heading"><span class="choice-letter">D</span><span class="choice-copy"><strong class="choice-title"></strong><span class="choice-description"></span></span></span>
             </button>
           </div>
         </section>
@@ -201,6 +188,7 @@
   <script src="js/result-data.js?v=1" defer></script>
   <script src="js/scoring.js?v=2" defer></script>
   <script src="js/submission.js?v=1" defer></script>
-  <script src="js/app.js?v=10" defer></script>
+  <script src="js/question-data.js?v=1" defer></script>
+<script src="js/app.js?v=14" defer></script>
 </body>
 </html>
