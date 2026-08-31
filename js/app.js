@@ -88,6 +88,19 @@ function startQuiz(){
 }
 
 function showStatus(message){clearTimeout(statusTimer);status.textContent=message;status.classList.add("is-visible");statusTimer=setTimeout(()=>status.classList.remove("is-visible"),1800);}
+function formatSubmissionError(response,fallback){
+  const context=[];
+  if(response&&response.status)context.push(`HTTP ${response.status}`);
+  if(response&&response.code)context.push(`code: ${response.code}`);
+  if(response&&response.details)context.push(`details: ${JSON.stringify(response.details)}`);
+  return `${response&&response.message||fallback}${context.length?` ｜ ${context.join(" ｜ ")}`:""}`;
+}
+function showSubmissionError(response,fallback){
+  clearTimeout(statusTimer);
+  status.textContent=formatSubmissionError(response,fallback);
+  status.classList.add("is-visible");
+  console.error("[LearningStars API]",response);
+}
 function goTo(index,announce=true){if(index<0||index>=questions.length||index===state.current)return;quiz.classList.add("is-changing");setTimeout(()=>{state.current=index;render({announce});requestAnimationFrame(()=>quiz.classList.remove("is-changing"));scrollTo({top:0,behavior:"smooth"});},160);}
 function select(letter,focus=false){state.answers[state.current]=letter;choices.forEach(button=>{const active=button.dataset.option===letter;button.setAttribute("aria-checked",String(active));button.tabIndex=active?0:-1;if(active&&focus)button.focus();});progressButtons[state.current].classList.add("is-answered");nextButton.classList.remove("needs-answer");const option=questions[state.current].options.find(item=>item.letter===letter);showStatus(`已選擇 ${letter}：${option.title}`);}
 function showStage(target,focusTarget){
@@ -123,7 +136,7 @@ async function completeQuiz(){
   state.resultStatus=await LearningStarsSubmission.submitResult(payload);
   if(!state.resultStatus.ok){
     nextButton.disabled=false;
-    showStatus(state.resultStatus.message||"測驗結果未能送出，請檢查連線後再試一次");
+    showSubmissionError(state.resultStatus,"測驗結果未能送出，請檢查連線後再試一次");
     return;
   }
   const result=state.resultStatus.data,scores=result.scores||{};
@@ -132,7 +145,7 @@ async function completeQuiz(){
   state.resultId=result.result_code;
   if(!/^[a-f0-9]{32}$/.test(state.resultToken||"")||!LearningStarsResults[state.resultId]){
     nextButton.disabled=false;
-    showStatus("測驗結果回應格式錯誤，請稍後再試一次");
+    showSubmissionError({code:"invalid_response",details:result},"測驗結果回應格式錯誤，請稍後再試一次");
     return;
   }
   renderResult();nextButton.disabled=false;showStage(resultScreen,resultHeading);
@@ -174,7 +187,8 @@ async function submitContact(event){
   const response=await LearningStarsSubmission.submitContact(payload);
   contactSubmitButton.disabled=false;contactForm.removeAttribute("aria-busy");
   if(!response.ok){
-    contactStatus.textContent=response.message||"資料未送出，請檢查連線後再試一次。";
+    contactStatus.textContent=formatSubmissionError(response,"資料未送出，請檢查連線後再試一次。");
+    console.error("[LearningStars API]",response);
     return;
   }
   contactForm.reset();showStage(finishScreen,finishHeading);

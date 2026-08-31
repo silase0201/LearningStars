@@ -25,11 +25,11 @@
       let body=null;
       try{body=await response.json();}catch(error){/* The caller still receives the HTTP status below. */}
       if(!response.ok||!body||body.ok!==true){
-        return {ok:false,code:body&&body.error&&body.error.code||"http_error",message:body&&body.error&&body.error.message||"伺服器回應錯誤",status:response.status};
+        return {ok:false,code:body&&body.error&&body.error.code||"http_error",message:body&&body.error&&body.error.message||"伺服器回應錯誤",details:body&&body.error&&body.error.details||null,status:response.status};
       }
       return {ok:true,data:body.data||{}};
     }catch(error){
-      return {ok:false,code:error&&error.name==="AbortError"?"timeout":"network_error"};
+      return {ok:false,code:error&&error.name==="AbortError"?"timeout":"network_error",message:error&&error.name==="AbortError"?"API 連線逾時":error&&error.message||"API 連線失敗",details:error?{name:error.name,message:error.message,stack:error.stack}:null};
     }finally{clearTimeout(timer);}
   }
 
