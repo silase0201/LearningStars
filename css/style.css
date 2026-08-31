@@ -277,7 +277,7 @@ body:before{content:"";position:fixed;z-index:0;inset:0;pointer-events:none;back
 /* 2.question mobile: readable scene copy and a choice grid that fills the space above the footer. */
 @media(max-width:899px){
   .scene{height:clamp(260px,69vw,430px);aspect-ratio:auto}
-  .scene-copy{padding-top:12px; top:2.5%;left:50%;width:min(88%,38rem)}
+  .scene-copy{padding-top:25px; top:2.5%;left:50%;width:min(88%,38rem)}
   .scene-level{padding:.14rem .72rem;font-size:clamp(.96rem,2.3vw,1.08rem)}
   .scene-title{margin:.08rem 0 .28rem;font-size:clamp(1.72rem,4.7vw,2.25rem);line-height:1.08}
   .scene-description{width:min(100%,36rem);font-size:clamp(.94rem,2.45vw,1.15rem);line-height:1.34}
