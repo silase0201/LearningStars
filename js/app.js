@@ -33,7 +33,7 @@ const sceneMidgrounds={
   ]
 };
 const foregroundHeights={q01:573,q02:737,q03:434,q04:775,q05:652,q06:639};
-const state={current:0,answers:Array(questions.length).fill(null),submissionId:null,scores:null,resultId:null,statisticsStatus:null};
+const state={current:0,answers:Array(questions.length).fill(null),submissionId:null,resultToken:null,scores:null,resultId:null,resultStatus:null};
 const startScreen=document.querySelector("#startScreen"),startButton=document.querySelector("#startButton"),quiz=document.querySelector("#quiz"),pageTitle=document.querySelector("#pageTitle"),sceneMidground=document.querySelector("#sceneMidground"),sceneForeground=document.querySelector("#sceneForeground"),sceneTitle=document.querySelector("#sceneTitle"),sceneDescription=document.querySelector("#sceneDescription"),sceneQuestion=document.querySelector("#sceneQuestion"),choices=[...document.querySelectorAll(".choice")],progressButtons=[...document.querySelectorAll("#progress button")],progressCount=document.querySelector("#progressCount"),backButton=document.querySelector("#backButton"),nextButton=document.querySelector("#nextButton"),nextText=document.querySelector("#nextText"),status=document.querySelector("#status");
 const resultScreen=document.querySelector("#resultScreen"),resultHeading=document.querySelector("#resultHeading"),resultName=document.querySelector("#resultName"),resultSubtitle=document.querySelector("#resultSubtitle"),resultIntro=document.querySelector("#resultIntro"),resultTraits=document.querySelector("#resultTraits"),resultIcons=document.querySelector("#resultIcons"),resultContactButton=document.querySelector("#resultContactButton");
 const contactScreen=document.querySelector("#contactScreen"),contactHeading=document.querySelector("#contactHeading"),contactBackButton=document.querySelector("#contactBackButton"),contactForm=document.querySelector("#contactForm"),contactSubmitButton=document.querySelector("#contactSubmitButton"),contactStatus=document.querySelector("#contactStatus"),finishScreen=document.querySelector("#finishScreen"),finishHeading=document.querySelector("#finishHeading");
@@ -119,10 +119,22 @@ function renderResult(){
 async function completeQuiz(){
   nextButton.disabled=true;showStatus("正在整理孩子的探索結果…");
   state.submissionId=state.submissionId||LearningStarsSubmission.createSubmissionId();
-  state.scores=LearningStarsScoring.calculateMainScores(state.answers);
-  state.resultId=LearningStarsScoring.resolveResultId(state.scores);
-  const payload={schema_version:1,submission_id:state.submissionId,assessment:{answers:[...state.answers],scores:state.scores,result_id:state.resultId},submitted_at:new Date().toISOString()};
-  state.statisticsStatus=await LearningStarsSubmission.submitStatistics(payload);
+  const payload={schema_version:1,submission_id:state.submissionId,assessment:{answers:[...state.answers]},submitted_at:new Date().toISOString()};
+  state.resultStatus=await LearningStarsSubmission.submitResult(payload);
+  if(!state.resultStatus.ok){
+    nextButton.disabled=false;
+    showStatus(state.resultStatus.message||"測驗結果未能送出，請檢查連線後再試一次");
+    return;
+  }
+  const result=state.resultStatus.data,scores=result.scores||{};
+  state.resultToken=result.result_token;
+  state.scores={target:Number(scores.T)||0,explore:Number(scores.E)||0,growth:Number(scores.G)||0};
+  state.resultId=result.result_code;
+  if(!/^[a-f0-9]{32}$/.test(state.resultToken||"")||!LearningStarsResults[state.resultId]){
+    nextButton.disabled=false;
+    showStatus("測驗結果回應格式錯誤，請稍後再試一次");
+    return;
+  }
   renderResult();nextButton.disabled=false;showStage(resultScreen,resultHeading);
 }
 
@@ -155,16 +167,14 @@ async function submitContact(event){
   if(!validateContact()){contactStatus.textContent="請確認標示的欄位。";contactForm.querySelector("[aria-invalid=true]").focus();return;}
   contactSubmitButton.disabled=true;contactForm.setAttribute("aria-busy","true");contactStatus.textContent="資料送出中…";
   const form=new FormData(contactForm),payload={
-    schema_version:1,submission_id:state.submissionId,
-    assessment:{answers:[...state.answers],scores:{...state.scores},result_id:state.resultId},
+    schema_version:1,submission_id:state.submissionId,result_token:state.resultToken,source:"learningstars-web",
     contact:{parent_name:String(form.get("parent_name")).trim(),phone:String(form.get("phone")).trim(),contact_period:form.get("contact_period"),child_name:String(form.get("child_name")).trim(),child_age:form.get("child_age"),county_city:form.get("county_city")},
     consent:{education_consultant_contact:true,copy_version:1,consented_at:new Date().toISOString()}
   };
   const response=await LearningStarsSubmission.submitContact(payload);
   contactSubmitButton.disabled=false;contactForm.removeAttribute("aria-busy");
-  // Temporary: let the prototype continue while no contact endpoint is configured.
-  if(!response.ok&&response.code!=="not_configured"){
-    contactStatus.textContent="資料未送出，請檢查連線後再試一次。";
+  if(!response.ok){
+    contactStatus.textContent=response.message||"資料未送出，請檢查連線後再試一次。";
     return;
   }
   contactForm.reset();showStage(finishScreen,finishHeading);
