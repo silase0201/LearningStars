@@ -20,16 +20,18 @@
       return {ok:true,mock:true,data:{contact_id:1,mail_status:"sent"}};
     }
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);
+    const url=endpoint+path;
     try{
-      const response=await fetch(endpoint+path,{method:"POST",headers:{"Content-Type":"application/json","X-Idempotency-Key":payload.submission_id},body:JSON.stringify(payload),signal:controller.signal,credentials:"same-origin"});
+      const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","X-Idempotency-Key":payload.submission_id},body:JSON.stringify(payload),signal:controller.signal,credentials:"same-origin"});
+      const rawBody=await response.text();
       let body=null;
-      try{body=await response.json();}catch(error){/* The caller still receives the HTTP status below. */}
+      try{body=rawBody?JSON.parse(rawBody):null;}catch(error){/* Keep the raw server response in details below. */}
       if(!response.ok||!body||body.ok!==true){
-        return {ok:false,code:body&&body.error&&body.error.code||"http_error",message:body&&body.error&&body.error.message||"伺服器回應錯誤",details:body&&body.error&&body.error.details||null,status:response.status};
+        return {ok:false,code:body&&body.error&&body.error.code||"http_error",message:body&&body.error&&body.error.message||"伺服器回應錯誤",details:{url,method:"POST",response_body:rawBody||null,api_details:body&&body.error&&body.error.details||null},status:response.status};
       }
       return {ok:true,data:body.data||{}};
     }catch(error){
-      return {ok:false,code:error&&error.name==="AbortError"?"timeout":"network_error",message:error&&error.name==="AbortError"?"API 連線逾時":error&&error.message||"API 連線失敗",details:error?{name:error.name,message:error.message,stack:error.stack}:null};
+      return {ok:false,code:error&&error.name==="AbortError"?"timeout":"network_error",message:error&&error.name==="AbortError"?"API 連線逾時":error&&error.message||"API 連線失敗",details:error?{url,method:"POST",name:error.name,message:error.message,stack:error.stack}:{url,method:"POST"}};
     }finally{clearTimeout(timer);}
   }
 
