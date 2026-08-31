@@ -1,9 +1,10 @@
 "use strict";
 
 (function(root){
-  const localhost=new Set(["lite2.ceoschool.app","34.80.51.82"]);
+  const localhost=new Set(["localhost","127.0.0.1","::1"]);
   const mockEnabled=localhost.has(location.hostname)&&new URLSearchParams(location.search).get("mockSubmission")==="1";
-  const defaultEndpoint="/KTKP/CEO/app/learning-stars";
+  const testApiEndpoint="https://lite2.ceoschool.app/KTKP/CEO/app/learning-stars";
+  const defaultEndpoint=location.origin==="https://silase0201.github.io"?testApiEndpoint:"/KTKP/CEO/app/learning-stars";
   const endpoint=(typeof root.LEARNING_STARS_API_ENDPOINT==="string"?root.LEARNING_STARS_API_ENDPOINT:defaultEndpoint).replace(/\/$/,"");
 
   function createSubmissionId(){
@@ -20,9 +21,10 @@
       return {ok:true,mock:true,data:{contact_id:1,mail_status:"sent"}};
     }
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);
-    const url=endpoint+path;
+    const url=new URL(endpoint+path,location.href).href;
     try{
-      const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","X-Idempotency-Key":payload.submission_id},body:JSON.stringify(payload),signal:controller.signal,credentials:"same-origin"});
+      const credentials=new URL(url).origin===location.origin?"same-origin":"omit";
+      const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","X-Idempotency-Key":payload.submission_id},body:JSON.stringify(payload),signal:controller.signal,credentials});
       const rawBody=await response.text();
       let body=null;
       try{body=rawBody?JSON.parse(rawBody):null;}catch(error){/* Keep the raw server response in details below. */}
